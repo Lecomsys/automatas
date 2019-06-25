@@ -46,7 +46,7 @@ class PageController extends Controller
 
             PhpstormProjectService
                 ::make($project_path)
-                ->setProjectViewBGColor($color);
+                ->set_project_view_bgcolor($color);
 
             return redirect()
                 ->to('phpstorm')

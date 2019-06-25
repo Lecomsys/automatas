@@ -10,16 +10,18 @@ use SimpleXMLElement;
 class PhpstormProjectService {
 
     protected $project_path;
+    protected $base_project_path;
 
-    protected function __construct($project_path) {
+    protected function __construct($project_path, $base_project_path) {
         $this->project_path = $project_path;
+        $this->base_project_path = $base_project_path;
     }
 
-    public static function make($project_path) {
-        return new self($project_path);
+    public static function make($project_path, $base_project_path) {
+        return new self($project_path, $base_project_path);
     }
 
-    public function setProjectViewBGColor($color) {
+    public function set_project_view_bgcolor($color) {
         /*
          * 1. Ubicar la carpeta .idea del proyecto
          * 2. Cargar en memoria el archivo workspace.xml que hay en esa carpeta
@@ -28,8 +30,8 @@ class PhpstormProjectService {
          * 5. Cerrar el archivo guardando los cambios.
          * 6. Opcionalmente, ofrecerle al usuario de reiniciar el IDE al finalizar el comando.
          */
-        $filesystem = Storage::disk('full-access');
-        $project_path = $this->getProjectPath();
+        $filesystem = Storage::disk();
+        $project_path = $this->get_project_path();
 
         if (!$filesystem->exists($project_path)) { throw new Exception('No existe la carpeta de proyecto especificada ('.$project_path.')'); }
 
@@ -76,22 +78,20 @@ class PhpstormProjectService {
         }
 
         $new_xml = $xml_document->asXML();
-
-        Storage::disk('full-access')->put($workspace_file_path, $new_xml);
+        $filesystem->put($workspace_file_path, $new_xml);
     }
 
     /**
      * @return string
      */
-    public function getProjectPath(): string {
-        dd(env('BASE_PROJECT_FOLDER'));
-        return sprintf("%s/%s", env('BASE_PROJECT_FOLDER'), $this->project_path);
+    public function get_project_path(): string {
+        return sprintf("%s/%s", $this->base_project_path, $this->project_path);
     }
 
     /**
      * @param mixed $project_path
      */
-    public function setProjectPath($project_path): void {
+    public function set_project_path($project_path): void {
         $this->project_path = $project_path;
     }
 }
